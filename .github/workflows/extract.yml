@@ -38,6 +38,11 @@ jobs:
         working-directory: ./main
         run: |
           ms3 extract -f ${HOME}/files_modified.json -M ../measures -N ../notes -X ../harmonies
+          wget https://github.com/DCMLab/annotation_workflow_template/archive/refs/heads/main.zip
+          unzip main.zip
+          cp -r annotation_workflow_template-main/* .
+          rm -r annotation_workflow_template-main/
+          rm main.zip
       - name: Push extracted files
         working-directory: ./main
         continue-on-error: true
