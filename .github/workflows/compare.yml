@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - run: echo "${{ github.event.pusher.name }}"
       - name: Checkout PR
         uses: actions/checkout@v2
         with:
