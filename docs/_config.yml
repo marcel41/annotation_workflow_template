@@ -1,1 +1,3 @@
 theme: jekyll-theme-tactile
+title: A semi-automated workflow paradigm for the distributed creation and curation of expert annotations
+description: An easily adoptable and adaptable implementation via GitHub Actions, presented at the ISMIR Conference 2021
