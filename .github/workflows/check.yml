@@ -22,8 +22,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Display changed files
         run: |
-          echo "${{ steps.modified.outputs.modified }}"
-          echo "${{ join(steps.modified.outputs.modified) }}"
           cat ${HOME}/files_modified.json
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
