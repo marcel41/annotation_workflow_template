@@ -39,11 +39,12 @@ stored in a GitHub repository. It uses commands provided by the parsing library
 ## How to use the implementation
 
 1. Head to the [template repository](https://github.com/DCMLab/annotation_workflow_template/tree/ismir2021)
-   and click on "Use this template".
+   and click on "Use this template".\
    ![Use this template button](img/use_this_template.png)
 1. Create the new repository (if you want it "Private", you need to reconfigure
    the bot, see below).
-   ![Create repository](img/create_repo)
+   
+   ![Create repository](img/create_repo.png)
 
 ## Steps occurring in each job
 
