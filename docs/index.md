@@ -47,8 +47,8 @@ stored in a GitHub repository. It uses commands provided by the parsing library
    the bot, see below).\
    ![Create repository](img/create_repo.png)
 1. In the new repo, click on "Code" to copy the URL for the `git clone` command
-   and clone the repo to your machine(`git clone git@github.com:johentsch/annotated_mscx_files.git`)
-   in the example here.\
+   and clone the repo to your machine (`git clone git@github.com:johentsch/annotated_mscx_files.git`
+   in the example here).\
    ![Get clone URL](img/clone_url.png)
 
 ### Add uncompressed MuseScore files
@@ -62,8 +62,9 @@ stored in a GitHub repository. It uses commands provided by the parsing library
    `measures` and `notes` as well as the files `README.md` and `metadata.tsv`.\
    ![Commit created by the bot](img/after_extract.png)
 
-> :information_source: These files are automatically updated every time an
-> MSCX file is added to or modified on the main branch.
+{: .note }
+These files are automatically updated every time an MSCX file is added to or
+modified on the main branch.
 
 > :warning: You can add custom text to the README.md as long as you do it above
 > the 'Overview' heading. Everything below this heading is automatically overwritten.
