@@ -74,7 +74,7 @@ automatically overwritten.
    harmony layers (`Add -> Text -> {Chord Symbol|Roman Numeral Analysis|Nashville Number}`).
    For example, take this annotated _Ecossaise No. 7_, D. 145 by Franz Schubert:\
    ![Annotated Schubert Ecossaise](img/D145ecossaise07.png)
-1. Commit the changes. Every time you push to a side branch, the labels in
+1. Commit the changes. Every time you push to a child branch, the labels in
    all changed files will be checked for syntactical correctness according to
    the [DCML harmony annotation standard](https://github.com/DCMLab/standards):\
    ![Check in progress](img/check_annotations.png)
@@ -88,14 +88,14 @@ automatically overwritten.
    ![Pull Request for an annotated file](img/annotated_pr.png)
 1. After merging the Pull Request, the `ms3_extract` action is triggered again
    which will
-   * extract a tabular overview of the labels and store it as `harmonies/[file name].tsv`:\
-     ![Annotation table](img/annotation_table.png)
-   * read out the metadata from the updated MuseScore file which had been modified
-     in MuseScore by the annotator like so:\
-     ![Updating metadata in MuseScore](img/metadata.png)
-   * and writes these metadata to `metadata.tsv` and to the overview in the README file:\
-     ![Updated README file](img/updated_readme.png)
-   
+  * extract a tabular overview of the labels and store it as `harmonies/[file name].tsv`:\
+    ![Annotation table](img/annotation_table.png)
+  * read out the metadata from the updated MuseScore file which had been modified
+    in MuseScore by the annotator like so:\
+    ![Updating metadata in MuseScore](img/metadata.png)
+  * and writes these metadata to `metadata.tsv` and to the overview in the README file:\
+    ![Updated README file](img/updated_readme.png)
+
 
 Our [Annotation Tutorial](https://dcmlab.github.io/standards/build/html/tutorial/musescore.html#placing-the-annotation-cursor)
 has some more explanations on how to conveniently add Roman Numerals in MuseScore 3.
@@ -103,7 +103,18 @@ has some more explanations on how to conveniently add Roman Numerals in MuseScor
 In case you are using a different annotation standard you might want to remove
 or replace the DCML syntax check by other code.
 
-### Annotate
+### Review files
+
+1. The reviewer checks out a child branch and commits their changes to the
+   reviewed MuseScore file, which includes adding their initials to the file's
+   metadata so that they will appear in the README upon merge into main.
+1. Then, the reviewer creates a pull request to suggest the changes to
+   the annotator who is supposed to go through them to approve or contest them:\
+   ![Pull request opened by reviewer](img/reviewed_pr.png)\
+   This time, because of the presence of the `harmonies/[file name].tsv`
+   file, the `label_comparison` results in the `github-actions` bot pushing
+   an auxiliary MSCX file highlighting the changes made by the reviewer:\
+   ![Reviewed Schubert Ecossaise](img/D145ecossaise07_reviewed.png)
 
 # Documentation
 
