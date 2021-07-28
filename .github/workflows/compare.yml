@@ -13,7 +13,6 @@ jobs:
         with:
           path: main
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.MS3_BOT_TOKEN }}
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
         with:
@@ -42,9 +41,8 @@ jobs:
         working-directory: ./main
         continue-on-error: true
         run: |
-          git config --global user.name "ms3-bot"
-          git config --global user.email dcml.annotators@epfl.ch
-          git config --global user.token ${{ secrets.MS3_BOT_TOKEN }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Added comparison files for review"
       - name: Push files
