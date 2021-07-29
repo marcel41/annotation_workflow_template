@@ -51,30 +51,44 @@ as red squares in the schema, that are triggered by particular events:
   * convert the new annotations to different formats, perform transformations, etc.
 
 The fourth action, `Notify`, stands for notifications that GitHub dispatches
-to the contributors according to their preference settings.
+to the contributors according to their preference settings, to inform them
+about particular events to which they might have to react, such as a new
+version with changes to be discussed.
 
-### Particular use case
+### Specific use case
 
+The implementation that users can use out of the box is tailored to
+the specific setting where annotators make use of the free and open-source
+notation software [MuseScore 3](https://musescore.org/) to enter annotations
+into scores. In principle, it can be used for whatever annotations you may
+want to enter (see section [annotate files](#annotate-files)), but by default
+it is specifically configured to test all entered labels for compliance with the
+[DCML harmony annotation standard](https://github.com/DCMLab/standards)
+which follows a particular syntax to encode harmony, phrase, and cadence
+annotations.
 
+In order to perform automated tasks on annotated MSCX (uncompressed MuseScore format)
+files, this workflow implementation uses commands provided by the parsing library
+[ms3](https://pypi.org/project/ms3/). The mapping of the three actions mentioned
+above to commands of this library is:
 
-* When annotations are pushed to the repository's `main` branch, the `extract`
+* `Update => ms3 extract` to extract and store information from the annotated MSCX files
+  in the form of tab-separated values (TSV) files, namely by default:
 
-make use of the [DCML harmony annotation standard](https://github.com/DCMLab/standards)
-for entering harmony, phrase, and cadence annotations directly into
-uncompressed [MuseScore 3](https://musescore.org/) files (MSCX)
-stored in a GitHub repository. It uses commands provided by the parsing library
-[ms3](https://pypi.org/project/ms3/) for performing automated tasks, namely
-
-* `ms3 extract` to extract and store information from the annotated MSCX files
-  in the form of tab-separated values (TSV) files, namely
   * annotations
   * notes
   * measures
   * metadata
-  * (the command allows for extracting additional information)
-* `ms3 check` to detect syntax errors in the annotated MSCX files
-* `ms3 compare` to store, after a review of annotations, a copy of each reviewed
-  MSCX file in which the reviewer's changes are colour-highlighted.
+
+* `Test => ms3 check` to detect syntax errors in the annotated MSCX files
+* `Compare => ms3 compare` to store, after a review of annotations, a copy of each
+  reviewed MSCX file in which the reviewer's changes are colour-highlighted.
+
+If you are using other annotation standards, you might want to
+* substitute code for `ms3 check` accordingly, to test your annotations' validity;
+* prevent `ms3 extract` from trying to split the annotation labels into the
+  various features encoded through the DCML standard (see at the end of the
+  section [ms3 extract](#ms3-extract) below). 
 
 ## How to use the workflow implementation
 
