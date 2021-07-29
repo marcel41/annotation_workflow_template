@@ -21,14 +21,39 @@ only.
 The implementation is designed for a distributed setting where one or several
 annotators create text-based annotations in Git repositories hosted on
 [github.com](https://github.com), where their history is kept including all
-discussions occurring during their review. The workflow currently consists of
-three different automatic actions that are triggered by particular events,
-as laid out in the conference paper. The following schema shows one cycle
+discussions occurring during their review. The following schema shows one cycle
 of the workflow, at the end of which a reviewed annotation file is merged
 into the main branch, reflecting a consensus between the annotator and the
-reviewer:
+reviewer, as laid out in our conference paper:
 
 ![Annotation workflow schema](img/annotation_workflow.png)
+
+The workflow currently consists of three different automatic actions, represented
+as red squares in the schema, that are triggered by particular events:
+
+* `Test` is triggered upon every push to a child branch and checks the annotations
+  in all modified files for syntactical correctness. The schema exemplifies how
+  this action detects at least one syntax error in the commit `New annotations`,
+  causing the annotator to push `Corrections` which pass the renewed test.
+* `Compare` is triggered upon every push to a child branch after a pull request
+  has been created. For every new version pushed during the deliberation between
+  annotator and reviewer(s), this action, through a bot account, pushes auxiliary
+  files that allow to keep an easy overview of the suggested changes. This can
+  be particularly helpful in use cases where the annotations need to be seen
+  in relation to the original data that they describe in order to discuss them.
+* `Update` is triggered upon merge of the reviewed annotations into the `main`
+  branch and, again, uses a bot account to
+
+  * include information about the completed annotations in overviews, for
+    instance names of annotators and reviewers, amount of annotations, version
+    of the annotation standard, applied tools, etc.
+  * create summary statistics and plots for the new annotations
+  * convert the new annotations to different formats, perform transformations, etc.
+
+The fourth action, `Notify`, stands for notifications that GitHub dispatches
+to the contributors according to their preference settings.
+
+### Particular use case
 
 
 
@@ -103,6 +128,7 @@ automatically overwritten.
    ![Pull Request for an annotated file](img/annotated_pr.png)
 1. After merging the pull request, the `ms3_extract` action is triggered again
    which will
+
   * extract a tabular overview of the labels and store it as `harmonies/[file name].tsv`:\
     ![Annotation table](img/annotation_table.png)
   * read out the metadata from the updated MuseScore file which had been modified
