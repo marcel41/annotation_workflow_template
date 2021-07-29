@@ -121,13 +121,20 @@ or replace the DCML syntax check by other code.
 
 In the following we cover what you need to know to adapt the implementation
 to your own needs. As described in the conference paper, it is organized
-around three different actions, each defined in its own YAML file:
+around three different actions, each defined in its own YAML file stored in
+the (hidden) folder `.github/workflows`:
 
 * `extract.yml`, triggered upon every push to the `main` branch;
 * `check.yml`, triggered upon every push to a child branch (not on `main`);
 * `compare.yml`, triggered upon pull request and new commits added to it.
 
-The files are stored in the hidden folder `.github`.
+The following sections explain the structure of these files to give an idea
+how they can be adapted to other projects' needs. Projects using annotated
+MuseScore files, too, might want to keep using the MuseScore parsing library
+[ms3](https://pypi.org/project/ms3/) and adapt the employed commands. For
+dealing with other annotation data, users will have to replace it with other
+code.
+
 
 ## Structure of the YAML files
 
@@ -171,7 +178,7 @@ The general structure of the three jobs is as follows:
 
 1. Clone the current repository to perform actions on it
 2. Install code on the runner for performing the action
-3. Perform the action
+3. Detect which files were changed and perform the automated action on them
 4. (Have a bot push generated files to the repository, if applicable)
 
 Each job is defined through a sequence of steps and requires a `runs-on:`
@@ -238,6 +245,30 @@ The installation happens in the following three steps:
 In the subsequent steps, the commands of the ms3 library can be called.
 
 
+### Detecting which files were changed
+
+In order to retrieve the files that were modified during a push or pull-request
+event, we use the pre-defined action
+[get-changed-files](https://github.com/lots0logs/gh-action-get-changed-files):
+
+    - uses: lots0logs/gh-action-get-changed-files@2.1.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+It stores the corresponding file paths in JSON files which can be passed on
+to the code that will perform tasks on them. In an additional step,
+we output the content of these JSON files, which can be useful for
+debugging.
+
+    - name: Display changed and added files
+      run: |
+        cat ${HOME}/files_modified.json
+        cat ${HOME}/files_added.json
+
+> If we specify the ID 'modified' for the get-changed-files action, we can retrieve
+> the same information using the variable {{steps.modified.outputs.modified}} etc.
+
+
 ### Using a bot to push generated files to the repository
 
 First we configure the general `github-actions` bot as the Git user and then
@@ -261,8 +292,79 @@ we can do a normal stage-commit-push:
   repositories only (for private ones, see below).
 
 
+## Commands used for performing the respective task
+
+More details on the commands and their parameters can be found in
+[ms3's documentation](https://johentsch.github.io/ms3/) or, if you have
+installed the library locally via `pip install ms3`, by calling the
+respective command with the flag `-h`.
+
+### ms3 check
+
+The command used to check the labels within all modified MSCX files is:
+
+    - name: Run ms3 check
+      working-directory: ./main
+      run: |
+        ms3 check -f ${HOME}/files_modified.json --assertion
+
+The `--assertion` flag causes the command to throw an error when it has
+detected at least one syntactical mistake, deliberately causing the GitHub
+action to fail. The mistakes are displayed in the corresponding error
+message.
 
 
+### ms3 extract
+
+This command is executed twice, namely for all modified and all added files:
+
+    - name: Run ms3 extract
+      working-directory: ./main
+      run: |
+        ms3 extract -f ${HOME}/files_modified.json -M -N -X -D
+        ms3 extract -f ${HOME}/files_added.json -M -N -X -D
+
+The flags correspond to the following outputs and default values:
+
+* `-M`: store information on each measure under `../measures`
+* `-N`: store information on each note under `../notes`
+* `-X`: treat all annotations as DCML harmony labels, split them into feature
+  columns, and store the information under `../harmonies`
+* `-D`: extract metadata from the MuseScore files and update the files `metadata.tsv`
+  and `README.md` under the current working directory.
+
+You can change the directory names to your liking by simply passing a different
+argument, e.g. `-X ../expanded` to store the files in the directory called
+`expanded` lying next to the directory containing the MuseScore files. Note
+that all stored TSV files have the same filename as their MSCX counterpart and
+therefore need to be written to individual directories.
+
+In case you are not using DCML harmony labels, you might be particularly
+interested in the option
+
+* `-L` for storing all labels under `../annotations`, or a different directory you specify.
+
+
+### ms3 compare
+
+This command compares the annotations in the modified MuseScore files against
+a TSV annotation table generated by `ms3 extract` with flag `-X` or `-L`.
+
+    - name: Run ms3 compare
+      working-directory: ./main
+      run: |
+        ms3 compare -f ${HOME}/files_modified.json
+
+By default, for it looks for such a file in the relative folder `../harmonies`.
+If you are storing annotation tables under a different path, pass this path
+as argument with the flag `-a`.
+
+To give an example, say your MuseScore files are contained in the folder `MS3`
+and you are extracting the contained labels to the folder `labels`, that is,
+you are using the command `ms3 extract -L ../labels`, you would need to use
+`ms3 compare -a ../labels`.
+
+If no corresponding TSV file is found, for instance because
 
 ## Configuring the bot
 
