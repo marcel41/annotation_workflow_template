@@ -19,7 +19,22 @@ only.
 ## Use Case
 
 The implementation is designed for a distributed setting where one or several
-annotators make use of the [DCML harmony annotation standard](https://github.com/DCMLab/standards)
+annotators create text-based annotations in Git repositories hosted on
+[github.com](https://github.com), where their history is kept including all
+discussions occurring during their review. The workflow currently consists of
+three different automatic actions that are triggered by particular events,
+as laid out in the conference paper. The following schema shows one cycle
+of the workflow, at the end of which a reviewed annotation file is merged
+into the main branch, reflecting a consensus between the annotator and the
+reviewer:
+
+![Annotation workflow schema](img/annotation_workflow.png)
+
+
+
+* When annotations are pushed to the repository's `main` branch, the `extract`
+
+make use of the [DCML harmony annotation standard](https://github.com/DCMLab/standards)
 for entering harmony, phrase, and cadence annotations directly into
 uncompressed [MuseScore 3](https://musescore.org/) files (MSCX)
 stored in a GitHub repository. It uses commands provided by the parsing library
@@ -115,7 +130,9 @@ or replace the DCML syntax check by other code.
    file, the `label_comparison` results in the `github-actions` bot pushing
    an auxiliary MSCX file highlighting the changes made by the reviewer:\
    ![Reviewed Schubert Ecossaise](img/D145ecossaise07_reviewed.png)
-1. After merging the pull request, the
+1. After merging the pull request, the README shows that one file is done and
+   two others are yet to do:\
+   ![Readme after review](img/readme_complete.png)
 
 # Documentation
 
@@ -364,17 +381,82 @@ and you are extracting the contained labels to the folder `labels`, that is,
 you are using the command `ms3 extract -L ../labels`, you would need to use
 `ms3 compare -a ../labels`.
 
-If no corresponding TSV file is found, for instance because
+If no corresponding TSV file is found, for instance because new annotations
+had not been merged into the `main` branch yet triggering `ms3 extract`,
+the action won't fail.
 
-## Configuring the bot
 
-By default, the workflow implementation uses GitHub's standard bot for pushing
-files to your repository. In the Git history, its commits will figure under
-the name `github-actions` and, without further configuration (see below),
-it only works on public repositories.
+
+## Configuring the workflow for private repositories
+
+In order for the workflow to work with private repositories, you need to
+have GitHub [create and store a secret](https://docs.github.com/en/actions/reference/encrypted-secrets)
+which the `checkout` action and the bot can use. Secrets can grant
+access to a single repository or to all repositories of an organization (only
+organization admins can create the latter).
+
+Say you have stored the secret under the name `ACCESS_SECRET`, you need to pass
+it to the `checkout` action so it can clone the private repository:
+
+    - name: Clone repo
+            uses: actions/checkout@v2
+            with:
+              path: main
+              token: ${{ secrets.ACCESS_SECRET }}
+
+To enable the bot to push to the private repo, you add a third line to its
+configuration:
+
+    git config --global user.name "github-actions[bot]"
+    git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    git config --global user.token ${{ secrets.ACCESS_SECRET }}
+
+
+## Deploying automatic workflow updates from a central repository
+
+If you are using the same workflow on many repositories and want to make sure
+that you won't have to update them manually in case you change it, the recommended
+way might be [organization-wide workflow templates](https://docs.github.com/en/actions/configuring-and-managing-workflows/sharing-workflow-templates-within-your-organization).
+However, these used to be (or still are?) a Pro feature, so here is another
+way to do it.
+
+For example, the DCML-specific workflow implementation lies in the repository
+[annotation_workflow_template](https://github.com/DCMLab/annotation_workflow_template).
+which can be downloaded as a ZIP file using the URL
+`https://github.com/DCMLab/annotation_workflow_template/archive/refs/heads/main.zip`.
+So we have included in our `extract.yml` the following steps, after the
+current repository has been cloned into the folder `main` and Git has been
+configured to use the bot account:
+
+    - name: Pull current workflow
+      working-directory: ./main
+      run: |
+        wget https://github.com/DCMLab/annotation_workflow_template/archive/refs/heads/main.zip
+        unzip main.zip
+        cp -r annotation_workflow_template-main/. .
+        rm -r annotation_workflow_template-main/
+        rm main.zip
+    - name: Push updated workflow
+      working-directory: ./main
+      continue-on-error: true
+      run: |
+        git add -A
+        git commit -m "Updated version of workflows"
+        git push
+
+This downloads the ZIP file, unzips it, copies the content into the clone,
+and pushes the updated workflow in case it was changed. There are two
+disadvantages to this approach:
+
+* In most cases, the steps are redundant.
+* The updated workflow enters into effect only the next time an action is
+  triggered, not during the current execution.
 
 # Known limitations
 
-* PRs with over 100 commits
-* deleting MuseScore files
-* MuseScore files with > 50 MB (rare)
+* The action `gh-action-get-changed-files@2.1.4` sends HTTP requests for every commit
+  contained in a pull request which causes an `abuse detection mechanism` error when
+  the number of commits approaches 200. An [issue has been filed](https://github.com/lots0logs/gh-action-get-changed-files/issues/14).
+* When you delete MuseScore files from the repository or rename them, they will
+  not be deleted from the `metadata.tsv` nor from the `README.md`.
+* GitHub cannot handle MuseScore files > 50 MB (which are rare).
