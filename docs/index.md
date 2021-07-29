@@ -16,7 +16,7 @@ It is an adapted version of the implementation that is at the heart of the
 and, without further configuration, works out of the box for public repositories
 only.
 
-## Use Case
+## General use Case
 
 The implementation is designed for a distributed setting where one or several
 annotators create text-based annotations in Git repositories hosted on
@@ -55,7 +55,7 @@ to the contributors according to their preference settings, to inform them
 about particular events to which they might have to react, such as a new
 version with changes to be discussed.
 
-### Specific use case
+## Specific use case
 
 The implementation that users can use out of the box is tailored to
 the specific setting where annotators make use of the free and open-source
@@ -84,11 +84,12 @@ above to commands of this library is:
 * `Compare => ms3 compare` to store, after a review of annotations, a copy of each
   reviewed MSCX file in which the reviewer's changes are colour-highlighted.
 
-If you are using other annotation standards, you might want to
+**If you are using other annotation standards, you may want to**
+
 * substitute code for `ms3 check` accordingly, to test your annotations' validity;
 * prevent `ms3 extract` from trying to split the annotation labels into the
   various features encoded through the DCML standard (see at the end of the
-  section [ms3 extract](#ms3-extract) below). 
+  section [ms3 extract](#ms3-extract) below).
 
 ## How to use the workflow implementation
 
@@ -98,7 +99,7 @@ If you are using other annotation standards, you might want to
    and click on "Use this template".\
    ![Use this template button](img/use_this_template.png)
 1. Create the new repository (if you want it "Private", you need to reconfigure
-   the bot, see below).\
+   the bot, see [below](#configuring-the-workflow-for-private-repositories)).\
    ![Create repository](img/create_repo.png)
 1. In the new repo, click on "Code" to copy the URL for the `git clone` command
    and clone the repo to your machine (`git clone git@github.com:johentsch/annotated_mscx_files.git`
@@ -116,17 +117,23 @@ If you are using other annotation standards, you might want to
    `measures` and `notes` as well as the files `README.md` and `metadata.tsv`.\
    ![Commit created by the bot](img/after_extract.png)
 
+These files are automatically updated every time an MSCX file is modified on the
+main branch. Exactly what information is extracted and stored under which
+directory can be configured to your needs (see the section
+[ms3 extract](#ms3-extract) below).
 
-These files are automatically updated every time an MSCX file is added to or
-modified on the main branch. You can add custom text to the README.md as long
+You can add custom text to the README.md as long
 as you do it above the 'Overview' heading. Everything below this heading is
 automatically overwritten.
 
+
+
 ### Annotate files
 
-1. Create a new branch, use MuseScore 3 to add annotation labels to one of the
+1. Create a new branch and use MuseScore 3 to add annotation labels to one of the
    harmony layers (`Add -> Text -> {Chord Symbol|Roman Numeral Analysis|Nashville Number}`).
-   For example, take this annotated _Ecossaise No. 7_, D. 145 by Franz Schubert:\
+   For example, take this annotated _Ecossaise No. 7_, D. 145 by Franz Schubert
+   that uses the Roman Numeral Analysis layer and the DCML syntax:\
    ![Annotated Schubert Ecossaise](img/D145ecossaise07.png)
 1. Commit the changes. Every time you push to a child branch, the labels in
    all changed files will be checked for syntactical correctness according to
@@ -155,13 +162,18 @@ automatically overwritten.
 Our [Annotation Tutorial](https://dcmlab.github.io/standards/build/html/tutorial/musescore.html#placing-the-annotation-cursor)
 has some more explanations on how to conveniently add Roman Numerals in MuseScore 3.
 
-In case you are using a different annotation standard you might want to remove
-or replace the DCML syntax check by other code.
+**If you are using other annotation standards, you may want to**
+
+* substitute code for `ms3 check` accordingly, to test your annotations' validity;
+* prevent `ms3 extract` from trying to split the annotation labels into the
+  various features encoded through the DCML standard (see at the end of the
+  section [ms3 extract](#ms3-extract) below).
+
 
 ### Review files
 
 1. The reviewer checks out a child branch and commits their changes to the
-   reviewed MuseScore file, which includes adding their initials to the file's
+   annotated MuseScore file, which includes adding their initials to the file's
    metadata so that they will appear in the README upon merge into main.
 1. Then, the reviewer creates a pull request to suggest the changes to
    the annotator who is supposed to go through them to approve or contest them:\
@@ -178,18 +190,18 @@ or replace the DCML syntax check by other code.
 
 In the following we cover what you need to know to adapt the implementation
 to your own needs. As described in the conference paper, it is organized
-around three different actions, each defined in its own YAML file stored in
+around three different tasks, each defined in its own YAML file stored in
 the (hidden) folder `.github/workflows`:
 
-* `extract.yml`, triggered upon every push to the `main` branch;
-* `check.yml`, triggered upon every push to a child branch (not on `main`);
-* `compare.yml`, triggered upon pull request and new commits added to it.
+* `extract.yml` (Update), triggered upon every push to the `main` branch;
+* `check.yml` (Test), triggered upon every push to a child branch (not on `main`);
+* `compare.yml` (Compare), triggered upon pull request and new commits added to it.
 
 The following sections explain the structure of these files to give an idea
 how they can be adapted to other projects' needs. Projects using annotated
 MuseScore files, too, might want to keep using the MuseScore parsing library
 [ms3](https://pypi.org/project/ms3/) and adapt the employed commands. For
-dealing with other annotation data, users will have to replace it with other
+dealing with other annotation data, users will have to replace the library with other
 code.
 
 
@@ -201,10 +213,10 @@ On the top level, each configuration file has three directives:
     on:     # definition when the action is triggered
     jobs:   # definition of one or several jobs, each launching a new runner
 
-Since every job sets up a new runner (virtual machine) needing set up and configuration,
-each of the three actions consists of only one job.    
+Since every job sets up a new runner (virtual machine) needing set up and
+configuration, each of the three tasks consists of only one job.    
 
-## Defining the triggers via `on:`
+### Defining the triggers via `on:`
 
 We are using the events `push` and `pull-request`. A full list of possible
 events is available in the [GitHub documentation](https://docs.github.com/en/actions/reference/events-that-trigger-workflows).
@@ -229,9 +241,10 @@ events is available in the [GitHub documentation](https://docs.github.com/en/act
 
 This directive can be easily adapted.
 
-## Defining the job via `jobs:`
+### Defining the job via `jobs:`
 
-The general structure of the three jobs is as follows:
+The general structure of the three jobs is as follows (each sub-task
+corresponding to a subsection below):
 
 1. Clone the current repository to perform actions on it
 2. Install code on the runner for performing the action
@@ -255,7 +268,7 @@ For example, this is how the job named `compare` is defined:
 
 ## Steps shared by all three jobs
 
-### Cloning the repository to perform actions on it
+### 1. Cloning the repository to perform actions on it
 
 Before any action can be performed on the files in your repository, it needs
 to be cloned on the runner, i.e. on the virtual machine. This is usually done
@@ -269,11 +282,11 @@ via the action [checkout](https://github.com/actions/checkout).
 * The `name` is once more arbitrary.
 * The `path` directive clones the repo into the new folder `main`.
 * If you want to use the workflow implementation on a private repo, you need to
-  configure a bot token (see below).
+  configure a bot token (see [below](#configuring-the-workflow-for-private-repositories)).
 * If you want to perform actions on a particular branch, you can use the `ref`
   directive to checkout this branch (for an example, see the next section)
 
-### Installing the Python library `ms3`
+### 2. Installing the Python library `ms3`
 
 The [ms3](https://pypi.org/project/ms3/) library provides the commands used
 by this workflow implementation to parse MuseScore files and perform the
@@ -299,10 +312,11 @@ The installation happens in the following three steps:
         python -m pip install --upgrade pip
         python -m pip install -e ./ms3
 
-In the subsequent steps, the commands of the ms3 library can be called.
+From here on, the [commands of the ms3 library](#commands-used-for-performing-the-respective-task)
+can be called.
 
 
-### Detecting which files were changed
+### 3. Detecting which files were changed
 
 In order to retrieve the files that were modified during a push or pull-request
 event, we use the pre-defined action
@@ -310,7 +324,7 @@ event, we use the pre-defined action
 
     - uses: lots0logs/gh-action-get-changed-files@2.1.4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: $\{\{ secrets.GITHUB_TOKEN \}\}
 
 It stores the corresponding file paths in JSON files which can be passed on
 to the code that will perform tasks on them. In an additional step,
@@ -326,7 +340,7 @@ debugging.
 > the same information using the variable {{steps.modified.outputs.modified}} etc.
 
 
-### Using a bot to push generated files to the repository
+### 4. Using a bot to push generated files to the repository
 
 First we configure the general `github-actions` bot as the Git user and then
 we can do a normal stage-commit-push:
