@@ -84,9 +84,9 @@ automatically overwritten.
    the `}` indicating the phrase ending needs to be the last character:\
    ![Displaying syntax errors](img/syntax_error.png)
 1. Once the error is fixed, the new annotations can be merged into the main
-   branch by opening a Pull Request:\
+   branch by opening a pull request:\
    ![Pull Request for an annotated file](img/annotated_pr.png)
-1. After merging the Pull Request, the `ms3_extract` action is triggered again
+1. After merging the pull request, the `ms3_extract` action is triggered again
    which will
   * extract a tabular overview of the labels and store it as `harmonies/[file name].tsv`:\
     ![Annotation table](img/annotation_table.png)
@@ -115,10 +115,81 @@ or replace the DCML syntax check by other code.
    file, the `label_comparison` results in the `github-actions` bot pushing
    an auxiliary MSCX file highlighting the changes made by the reviewer:\
    ![Reviewed Schubert Ecossaise](img/D145ecossaise07_reviewed.png)
+1. After merging the pull request, the
 
 # Documentation
 
-## Steps occurring in each job
+In the following we cover what you need to know to adapt the implementation
+to your own needs. As described in the conference paper, it is organized
+around three different actions, each defined in its own YAML file:
+
+* `extract.yml`, triggered upon every push to the `main` branch;
+* `check.yml`, triggered upon every push to a child branch (not on `main`);
+* `compare.yml`, triggered upon pull request and new commits added to it.
+
+The files are stored in the hidden folder `.github`.
+
+## Structure of the YAML files
+
+On the top level, each configuration file has three directives:
+
+    name:   # arbitrary name of the action
+    on:     # definition when the action is triggered
+    jobs:   # definition of one or several jobs, each launching a new runner
+
+Since every job sets up a new runner (virtual machine) needing set up and configuration,
+each of the three actions consists of only one job.    
+
+## Defining the triggers via `on:`
+
+We are using the events `push` and `pull-request`. A full list of possible
+events is available in the [GitHub documentation](https://docs.github.com/en/actions/reference/events-that-trigger-workflows).
+
+`extract.yml` is triggered upon every push to the `main` branch:
+
+    on:
+      push:
+        branches:
+          - main
+
+`check.yml` is triggered upon every push to a child branch (not on `main`):
+
+    on:
+      push:
+        branches-ignore:
+          - main
+
+`compare.yml` is triggered upon pull request and new commits added to it:
+
+    on: pull_request
+
+This directive can be easily adapted.
+
+## Defining the job via `jobs:`
+
+The general structure of the three jobs is as follows:
+
+1. Clone the current repository to perform actions on it
+2. Install code on the runner for performing the action
+3. Perform the action
+4. (Have a bot push generated files to the repository, if applicable)
+
+Each job is defined through a sequence of steps and requires a `runs-on:`
+directive specifying the operating system of the runner to be set up. Our jobs
+use the GNU/Linux runner `ubuntu-latest`. A full list is available in the
+[GitHub documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on).
+
+For example, this is how the job named `compare` is defined:
+
+    jobs:
+      compare:
+        runs-on: ubuntu-latest
+        steps:
+          - name:   # arbitrary name of the first step
+            run:    # commands run during this step
+          - name:   # arbitrary name of the second step, etc.
+
+## Steps shared by all three jobs
 
 ### Cloning the repository to perform actions on it
 
@@ -131,11 +202,12 @@ via the action [checkout](https://github.com/actions/checkout).
       with:
         path: main
 
+* The `name` is once more arbitrary.
 * The `path` directive clones the repo into the new folder `main`.
 * If you want to use the workflow implementation on a private repo, you need to
   configure a bot token (see below).
 * If you want to perform actions on a particular branch, you can use the `ref`
-  directive (for an example, see the next section)
+  directive to checkout this branch (for an example, see the next section)
 
 ### Installing the Python library `ms3`
 
@@ -164,6 +236,33 @@ The installation happens in the following three steps:
         python -m pip install -e ./ms3
 
 In the subsequent steps, the commands of the ms3 library can be called.
+
+
+### Using a bot to push generated files to the repository
+
+First we configure the general `github-actions` bot as the Git user and then
+we can do a normal stage-commit-push:
+
+    - name: Push generated files
+      working-directory: ./main
+      continue-on-error: true
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "This is the bot's commit message"
+        git push
+
+* `working-directory` matches the `path` that we specified when cloning the
+  repository (see above).
+* `continue-on-error` specifies that this action should not figure as failed
+  when no files were generated
+* Without further configuration, the `github-actions` bot works with public
+  repositories only (for private ones, see below).
+
+
+
+
 
 ## Configuring the bot
 
