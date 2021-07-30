@@ -50,10 +50,10 @@ as red squares in the schema, that are triggered by particular events:
   * create summary statistics and plots for the new annotations
   * convert the new annotations to different formats, perform transformations, etc.
 
-The fourth action, `Notify`, stands for notifications that GitHub dispatches
-to the contributors according to their preference settings, to inform them
-about particular events to which they might have to react, such as a new
-version with changes to be discussed.
+* The fourth action, `Notify`, stands for notifications that GitHub dispatches
+  to the contributors according to their preference settings, to inform them
+  about particular events to which they might have to react, such as a new
+  version with changes to be discussed.
 
 ## Specific use case
 
