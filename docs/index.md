@@ -473,11 +473,13 @@ organization admins can create the latter).
 Say you have stored the secret under the name `ACCESS_SECRET`, you need to pass
 it to the `checkout` action so it can clone the private repository:
 
+    {% raw %}
     - name: Clone repo
             uses: actions/checkout@v2
             with:
               path: main
               token: ${{ secrets.ACCESS_SECRET }}
+    {% endraw %}
 
 To enable the bot to push to the private repo, you add a third line to its
 configuration:
