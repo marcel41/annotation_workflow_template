@@ -291,7 +291,9 @@ via the action [checkout](https://github.com/actions/checkout).
 * If you want to use the workflow implementation on a private repo, you need to
   configure a bot token (see [below](#configuring-the-workflow-for-private-repositories)).
 * If you want to perform actions on a particular branch, you can use the `ref`
-  directive to checkout this branch (for an example, see the next section)
+  directive to checkout this branch (for an example, see the next section).
+  When checking out a pull request, `ref` receives its HEAD which is stored
+  in the system variable `${{ github.event.pull_request.head.ref }}`.
 
 ### 2. Installing the Python library `ms3`
 
