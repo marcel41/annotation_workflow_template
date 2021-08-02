@@ -304,10 +304,8 @@ via the action [checkout](https://github.com/actions/checkout).
 * If you want to perform actions on a particular branch, you can use the `ref`
   directive to checkout this branch (for an example, see the next section).
   When checking out a pull request, `ref` receives its HEAD which is stored
-  in the system variable
-  {% raw %}
-  `${{ github.event.pull_request.head.ref }}`.
-  {% endraw %}
+  in the system variable {% raw %} `${{ github.event.pull_request.head.ref }}`
+  {% endraw %}.
 
 ### 2. Installing the Python library `ms3`
 
