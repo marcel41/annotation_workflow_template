@@ -273,6 +273,17 @@ For example, this is how the job named `compare` is defined:
             run:    # commands run during this step
           - name:   # arbitrary name of the second step, etc.
 
+A job definition affords an `if` statement preventing its execution if the
+statement is false. For example, the job `perform_check` is only executed
+if the triggering push event was not authored by the bot account:
+
+    jobs:
+      perform_check:
+        if: github.event.pusher.name != 'github-actions[bot]'
+        runs-on: ubuntu-latest
+        steps:
+          - name:   # arbitrary name of the first step
+
 ## Steps shared by all three jobs
 
 ### 1. Cloning the repository to perform actions on it
