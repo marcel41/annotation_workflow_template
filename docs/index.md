@@ -28,7 +28,7 @@ reviewer, as laid out in our conference paper:
 
 ![Annotation workflow schema](img/annotation_workflow.png)
 
-The workflow currently consists of three different automatic actions, represented
+The workflow currently consists of four different automatic actions, represented
 as red squares in the schema, that are triggered by particular events:
 
 * `Test` is triggered upon every push to a child branch and checks the annotations
@@ -92,6 +92,13 @@ above to commands of this library is:
   section [ms3 extract](#ms3-extract) below).
 
 ## How to use the workflow implementation
+
+This is a quick reference how the implementation can be used out of the box.
+A more detailed explanation for annotators and reviewers that also includes
+specific Git commands is part of the
+[DCML annotation standard's documentation](https://dcmlab.github.io/standards/workflow).
+The [documentation below](#documentation) aims at users who would like to
+adapt the GitHub workflow files to their particular use case.
 
 ### Create a GitHub repository
 
