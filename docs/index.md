@@ -534,3 +534,9 @@ disadvantages to this approach:
 * When you delete MuseScore files from the repository or rename them, they will
   not be deleted from the `metadata.tsv` nor from the `README.md`.
 * GitHub cannot handle MuseScore files > 50 MB (which are rare).
+
+# Bugs and issues
+
+If you encounter unexpected errors or have trouble adapting the GitHub workflow
+to your needs, please describe your problem or question on this repository's
+[issue tracker](https://github.com/DCMLab/dcml_annotation_workflow/issues).
