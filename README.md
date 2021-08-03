@@ -1,0 +1,1 @@
+The generalized version of the DCML annotation workflow, published at ISMIR 2021, was moved to https://github.com/DCMLab/dcml_annotation_workflow/
