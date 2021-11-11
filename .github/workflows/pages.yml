@@ -53,7 +53,7 @@ jobs:
       - name: Generate GitHub pages
         working-directory: ./main
         run: |
-          python .github/workflows/update_pages.py -f ${HOME}/files_modified.json -o ../public
+          python .github/workflows/update_pages.py -g ${{ github.repository }} -t ${{ secrets.MS3_BOT_MAINTENANCE  }} -f ${HOME}/files_modified.json -o ../public
       - name: Display generated files
         working-directory: ./public
         run: ls
