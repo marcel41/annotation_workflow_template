@@ -120,7 +120,8 @@ def check_dir(d):
     if not os.path.isdir(d):
         d = resolve_dir(os.path.join(os.getcwd(), d))
         if not os.path.isdir(d):
-            raise argparse.ArgumentTypeError(d + " needs to be an existing directory")
+            print(d + " needs to be an existing directory")
+            return
     return resolve_dir(d)
 
 
