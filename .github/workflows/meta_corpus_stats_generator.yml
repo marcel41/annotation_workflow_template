@@ -18,6 +18,10 @@ jobs:
           path: main
           submodules: recursive
           token: ${{ secrets.MS3_BOT_TOKEN }}
+      - name: Pull latest updates into submodules
+        working-directory: ./main
+        run: |
+          git submodule foreach "git checkout -f main | git clean -f | git pull --no-rebase --allow-unrelated-histories origin main"
       - name: Pull current workflow
         working-directory: ./main
         run: |
