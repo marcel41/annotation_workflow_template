@@ -21,11 +21,11 @@ jobs:
       - name: Pull current workflow
         working-directory: ./main
         run: |
-          wget https://github.com/DCMLab/annotation_workflow_template/archive/refs/heads/main.zip
-          unzip main.zip
-          cp -r annotation_workflow_template-main/. .
-          rm -r annotation_workflow_template-main/
-          rm main.zip
+          wget https://github.com/DCMLab/annotation_workflow_template/archive/refs/heads/meta_corpora.zip
+          unzip annotation_workflow_template-meta_corpora.zip
+          cp -r annotation_workflow_template-meta_corpora/. .
+          rm -r annotation_workflow_template-meta_corpora/
+          rm annotation_workflow_template-meta_corpora.zip
       - name: Configure git and push updated workflow
         working-directory: ./main
         continue-on-error: true
@@ -54,6 +54,18 @@ jobs:
         run: |
           cat ${HOME}/files_modified.json
           cat ${HOME}/files_added.json
+      - name: Run ms3 extract
+        working-directory: ./main
+        run: |
+          ms3 extract -f ${HOME}/files_modified.json -M -N -X -D
+          ms3 extract -f ${HOME}/files_added.json -M -N -X -D
+      - name: Push files
+        working-directory: ./main
+        continue-on-error: true
+        run: |
+          git add -A
+          git commit -m "Automatically added TSV files from parse with ms3"
+          git push
       - name: Clone corpusstats
         uses: actions/checkout@v2
         with:
@@ -76,4 +88,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
           enable_jekyll: true
-
