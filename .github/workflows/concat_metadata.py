@@ -5,6 +5,8 @@ import argparse, sys, os
 import pandas as pd
 from pytablewriter import MarkdownTableWriter
 
+from update_pages import resolve_dir
+
 def check_and_create(d):
     """ Turn input into an existing, absolute directory path.
     """
@@ -70,14 +72,7 @@ def metadata2markdown(concatenated):
         result += heading + md
     return result
 
-def resolve_dir(d):
-    """ Resolves '~' to HOME directory and turns ``d`` into an absolute path.
-    """
-    if d is None:
-        return None
-    if '~' in d:
-        return os.path.expanduser(d)
-    return os.path.abspath(d)
+
 
 def write_md(md_str, md_path):
     if os.path.isfile(md_path):
