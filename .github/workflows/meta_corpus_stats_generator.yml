@@ -34,7 +34,7 @@ jobs:
         run: |
           wget https://github.com/DCMLab/annotation_workflow_template/archive/refs/heads/meta_corpora.zip
           unzip meta_corpora.zip
-          cp -r annotation_workflow_template-meta_corpora/. .
+          cp -r annotation_workflow_template-meta_corpora/.github .
           rm -r annotation_workflow_template-meta_corpora/
           rm meta_corpora.zip
       - name: Push updated workflow
