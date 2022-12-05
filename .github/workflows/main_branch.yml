@@ -20,6 +20,7 @@ jobs:
       - name: Action_to_run_docker
         uses: DCMLab/dcml_corpus_workflow@v2.4.4 # Uses an action in the root directory
         id: act_docker
+        working-directory: ${{ github.repository.name }}
         with:
           ms3-command: "push_to_main"
         env:
