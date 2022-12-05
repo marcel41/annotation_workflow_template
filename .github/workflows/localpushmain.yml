@@ -1,11 +1,11 @@
-name: local_testing
+name: Push to main branch
 
 on:
   push:
     branches:
       - main
 jobs:
-  compare:
+  ms3 review:
     if: (github.actor != 'ms3-bot' && github.event.pusher.name != 'github-actions[bot]')
     runs-on: ubuntu-latest
     steps:
