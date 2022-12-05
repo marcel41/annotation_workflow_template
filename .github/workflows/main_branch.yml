@@ -5,7 +5,7 @@ on:
     branches:
       - main
 jobs:
-  ms3 review:
+  ms3_review:
     if: (github.actor != 'ms3-bot' && github.event.pusher.name != 'github-actions[bot]')
     runs-on: ubuntu-latest
     steps:
