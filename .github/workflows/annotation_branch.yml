@@ -17,12 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Show workspace variables
-        run: |
-          echo 'github.workspace === ${{ github.workspace }}'
-          echo "GITHUB_WORKSPACE === $GITHUB_WORKSPACE"
-          echo 'runner.workspace === ${{ runner.workspace }}'
-          echo "RUNNER_WORKSPACE === $RUNNER_WORKSPACE"
 
       - name: Checkout corpus repository
         uses: actions/checkout@v3
@@ -31,8 +25,18 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.MS3_BOT_TOKEN }}
 
+      # - name: Show workspace variables
+      #   run: |
+      #     echo 'github.workspace === ${{ github.workspace }}'
+      #     ls ${{ github.workspace }}
+      #     echo "GITHUB_WORKSPACE === $GITHUB_WORKSPACE"
+      #     ls $GITHUB_WORKSPACE
+      #     echo 'runner.workspace === ${{ runner.workspace }}'
+      #     ls ${{ runner.workspace }}
+      #     echo "RUNNER_WORKSPACE === $RUNNER_WORKSPACE"
+      #     ls $RUNNER_WORKSPACE
 
-      - name: Push into open Pull Request or not?
+      - name: Pull Request open or not?
         id: checkpull
         continue-on-error: true
         run: |
@@ -56,8 +60,8 @@ jobs:
           comment_msg: "${{ github.event.head_commit.message }}"
           pr_title: "${{ github.event.pull_request.title }}"
 
-      - name: clean_workflow_if_skipped
-        working-directory: ${{ github.repository.name }}
+      - name: Cancel the run if skipped
+        working-directory: $GITHUB_WORKSPACE
         if: (steps.act_docker.outputs.skipped == 'true')
         run: |
            gh run cancel ${{ github.run_id }}
