@@ -37,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Action_to_run_docker
-        uses: DCMLab/dcml_corpus_workflow@v2.3.4 # Uses an action in the root directory
+        uses: DCMLab/dcml_corpus_workflow@v2.4.4 # Uses an action in the root directory
         id: act_docker
         with:
           ms3-command: ${{ github.event_name }}
