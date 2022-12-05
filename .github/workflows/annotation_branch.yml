@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latesti
     steps:
 
-      - name: Checkout
+      - name: Checkout corpus repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -25,7 +25,7 @@ jobs:
           token: ${{ secrets.MS3_BOT_TOKEN }}
 
 
-      - name: Check if pull
+      - name: Push into open Pull Request or not?
         id: checkpull
         continue-on-error: true
         run: |
@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Action_to_run_docker
+      - name: Run 'ms3 review' via dcml_corpus_workflow action
         uses: DCMLab/dcml_corpus_workflow@v2.4.4 # Uses an action in the root directory
         id: act_docker
         # working-directory: ${{ github.repository.name }}
